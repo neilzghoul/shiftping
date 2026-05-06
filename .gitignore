@@ -1,0 +1,4 @@
+.env
+.env.*
+authorized_user.json
+__pycache__/
