@@ -101,6 +101,14 @@ def find_column(sheet, day, shift):
                 return i + 1
     return None
 
+@app.route('/', methods=['GET'])
+def home():
+    return '''
+    <h1>ShiftPing Pro</h1>
+    <p>WhatsApp-based nurse shift preference scheduler.</p>
+    <p>Service is running.</p>
+    ''', 200
+
 @app.route('/webhook', methods=['POST', 'GET'])
 def webhook():
     try:
