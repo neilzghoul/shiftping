@@ -1,0 +1,51 @@
+ShiftPing Pro — Product Brief
+Problem
+Nursing supervisors manage 20–30 staff across 3 daily shifts, 7 days a week. Each nurse has unique preferences, and manually reconciling competing requests while maintaining fairness is time-consuming, error-prone, and a persistent source of staff friction. There is no systematic way to track whose preferences were honored previously, making equitable scheduling nearly impossible at scale.
+Users
+Two distinct user types:
+Nurses — submit monthly shift preferences. Need a simple, fast way to communicate availability and update their requests without learning new software or changing their habits significantly.
+Supervisors — receive all preference data and build the schedule. Need a clear, clean overview of who wants what, and a way to prioritize fairly across the team over time.
+Current State
+A blank paper schedule — divided into morning, evening, and night shifts across the week — is placed on the main nursing station counter. Nurses physically write their names into preferred slots whenever they pass by during their shift, until a submission deadline.
+This paper-based process has several critical problems:
+
+No editing — if a nurse makes a mistake or their availability changes, they cannot cleanly correct it. Crossing out or covering a pen-written name creates an illegible mess on a shared document that the supervisor must interpret.
+No history — there is no record of past allocations, so tracking fairness over time is impossible.
+No backup — if the paper is lost, damaged, or filled out illegibly, the entire data collection process breaks down.
+No accessibility — nurses who are off-duty during the submission window may miss the deadline entirely simply because they weren't physically present at the desk.
+
+After the deadline, the supervisor collects the paper and manually builds the schedule in her office — a process complicated further by the corrections, scribbles, and illegible entries on the form.
+How It Works
+ShiftPing Pro replaces the paper process with a WhatsApp-based preference submission system nurses already have on their phones.
+Nurses send WhatsApp messages using a simple three-tier system:
+
+WANT [date] — first priority, please schedule me here
+CAN [date] — available if needed, no strong preference
+NO [date] — please do not schedule me here
+
+Nurses can update or change their preferences at any time before the deadline — simply by sending a new message. The system automatically overwrites their previous entry, eliminating the pen-and-paper correction problem entirely.
+The system receives these messages, parses the preferences, and populates a Google Sheet showing each nurse's preference tier for every date in the scheduling period. The supervisor opens one sheet and sees the full picture — who wants what, who's flexible, who's unavailable — across the entire team, in real time, without collecting a single piece of paper.
+Fairness tracking is built in: nurses who didn't receive their WANT shifts in one period are flagged for priority consideration in the next.
+What Success Looks Like
+
+Schedule is filled completely without manual data collection
+Nurses can update preferences freely until the deadline without creating confusion
+Nurses who submitted WANT requests receive them at a higher rate than random chance
+Supervisors spend significantly less time chasing availability and deciphering handwriting
+No risk of lost, damaged, or illegible schedules
+Staff report feeling the process is fair and transparent
+
+V1 Scope
+
+Three-tier preference system (WANT / CAN / NO)
+WhatsApp input via Twilio
+Real-time Google Sheets output with preference overview per nurse per date
+Preference updates — nurses can change their submission before the deadline
+Basic fairness flag: tracks unmet WANT requests for next period priority
+
+Out of Scope for V1
+
+Five-tier or granular priority scales
+Automatic schedule generation — supervisor still makes final decisions
+Mobile app or web dashboard — the sheet is the interface for now
+Integration with hospital HR or payroll systems
