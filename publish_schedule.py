@@ -8,7 +8,7 @@ load_dotenv()
 TWILIO_ACCOUNT_SID = os.getenv('TWILIO_ACCOUNT_SID')
 TWILIO_AUTH_TOKEN = os.getenv('TWILIO_AUTH_TOKEN')
 TWILIO_WHATSAPP_NUMBER = os.getenv('TWILIO_WHATSAPP_NUMBER')
-SERVICE_ACCOUNT_FILE = '/Users/neilz./Documents/Projects/nurse-shift-scheduler/service_account.json'
+SERVICE_ACCOUNT_FILE = os.getenv('SERVICE_ACCOUNT_FILE', '/Users/neilz./Documents/Projects/nurse-shift-scheduler/service_account.json')
 SCHEDULE_URL = os.getenv('SCHEDULE_URL', 'http://localhost:8080/schedule')
 
 SHIFT_TIMES = {

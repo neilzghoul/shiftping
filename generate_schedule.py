@@ -1,6 +1,6 @@
 import gspread
 
-SERVICE_ACCOUNT_FILE = '/Users/neilz./Documents/Projects/nurse-shift-scheduler/service_account.json'
+SERVICE_ACCOUNT_FILE = os.getenv('SERVICE_ACCOUNT_FILE', '/Users/neilz./Documents/Projects/nurse-shift-scheduler/service_account.json')
 
 SHIFT_REQUIREMENTS = {
     'Morning': {'nurses': 4, 'assistants': 2},

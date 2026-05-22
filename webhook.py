@@ -1,5 +1,5 @@
-from flask import Flask, request, Response
 import gspread
+from flask import Flask, request, Response
 from datetime import datetime
 from dotenv import load_dotenv
 import os
@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
 
-SERVICE_ACCOUNT_FILE = '/Users/neilz./Documents/Projects/nurse-shift-scheduler/service_account.json'
+SERVICE_ACCOUNT_FILE = os.getenv('SERVICE_ACCOUNT_FILE', '/Users/neilz./Documents/Projects/nurse-shift-scheduler/service_account.json')
 
 SHIFT_KEYWORDS = ['MORNING', 'EVENING', 'NIGHT']
 PREF_KEYWORDS = ['WANT', 'CAN', 'NO']
