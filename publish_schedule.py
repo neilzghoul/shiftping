@@ -2,24 +2,29 @@ import gspread
 from twilio.rest import Client
 from dotenv import load_dotenv
 import os
+import json
 
 load_dotenv()
 
 TWILIO_ACCOUNT_SID = os.getenv('TWILIO_ACCOUNT_SID')
 TWILIO_AUTH_TOKEN = os.getenv('TWILIO_AUTH_TOKEN')
 TWILIO_WHATSAPP_NUMBER = os.getenv('TWILIO_WHATSAPP_NUMBER')
-SERVICE_ACCOUNT_FILE = os.getenv('SERVICE_ACCOUNT_FILE', '/Users/neilz./Documents/Projects/nurse-shift-scheduler/service_account.json')
 SCHEDULE_URL = os.getenv('SCHEDULE_URL', 'http://localhost:8080/schedule')
 
-SHIFT_TIMES = {
-    'Morning': '07:00-15:00',
-    'Evening': '15:00-23:00',
-    'Night':   '23:00-07:00',
-}
+SA_JSON = os.getenv('SERVICE_ACCOUNT_JSON')
+if SA_JSON:
+    with open('/tmp/service_account.json', 'w') as f:
+        f.write(SA_JSON)
+    SERVICE_ACCOUNT_FILE = '/tmp/service_account.json'
+else:
+    SERVICE_ACCOUNT_FILE = os.getenv('SERVICE_ACCOUNT_FILE', '/Users/neilz./Documents/Projects/nurse-shift-scheduler/service_account.json')
+
+def get_spreadsheet():
+    gc = gspread.service_account(filename=SERVICE_ACCOUNT_FILE)
+    return gc.open('Nurse Shift Scheduler')
 
 def get_all_staff():
-    gc = gspread.service_account(filename=SERVICE_ACCOUNT_FILE)
-    spreadsheet = gc.open('Nurse Shift Scheduler')
+    spreadsheet = get_spreadsheet()
     worksheets = spreadsheet.worksheets()
     pref_sheet = None
     for ws in worksheets:
@@ -41,8 +46,7 @@ def get_all_staff():
     return staff
 
 def get_week_label():
-    gc = gspread.service_account(filename=SERVICE_ACCOUNT_FILE)
-    spreadsheet = gc.open('Nurse Shift Scheduler')
+    spreadsheet = get_spreadsheet()
     sheet = spreadsheet.worksheet('Proposed Schedule')
     headers = sheet.row_values(1)[1:]
     if not headers:

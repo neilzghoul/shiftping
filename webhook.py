@@ -1,8 +1,8 @@
-import gspread
 from flask import Flask, request, Response
-from datetime import datetime
+import gspread
 from dotenv import load_dotenv
 import os
+import json
 import traceback
 import logging
 import re
@@ -12,9 +12,15 @@ load_dotenv()
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-app = Flask(__name__)
+SA_JSON = os.getenv('SERVICE_ACCOUNT_JSON')
+if SA_JSON:
+    with open('/tmp/service_account.json', 'w') as f:
+        f.write(SA_JSON)
+    SERVICE_ACCOUNT_FILE = '/tmp/service_account.json'
+else:
+    SERVICE_ACCOUNT_FILE = os.getenv('SERVICE_ACCOUNT_FILE', '/Users/neilz./Documents/Projects/nurse-shift-scheduler/service_account.json')
 
-SERVICE_ACCOUNT_FILE = os.getenv('SERVICE_ACCOUNT_FILE', '/Users/neilz./Documents/Projects/nurse-shift-scheduler/service_account.json')
+app = Flask(__name__)
 
 SHIFT_KEYWORDS = ['MORNING', 'EVENING', 'NIGHT']
 PREF_KEYWORDS = ['WANT', 'CAN', 'NO']
@@ -136,7 +142,6 @@ def webhook():
                    mimetype='text/xml', status=200)
 
 @app.route('/schedule', methods=['GET'])
-@app.route('/schedule', methods=['GET'])
 def view_schedule():
     try:
         spreadsheet = get_spreadsheet()
@@ -188,18 +193,6 @@ def view_schedule():
         else:
             week_label = "This Week"
 
-        SHIFT_TIMES = {
-            'Morning': '07:00–15:00',
-            'Evening': '15:00–23:00',
-            'Night':   '23:00–07:00',
-        }
-        SHIFT_EMOJI = {
-            'Morning': '🌅',
-            'Evening': '🌆',
-            'Night':   '🌙',
-        }
-
-        # Build grid HTML
         shifts_order = ['Morning', 'Evening', 'Night']
 
         html = f'''<!DOCTYPE html>
@@ -277,6 +270,6 @@ def view_schedule():
     except Exception as e:
         logger.error(f"Schedule view error: {e}")
         return f'<h2>Error loading schedule: {e}</h2>', 500
-        
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8080, debug=False)

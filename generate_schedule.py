@@ -1,6 +1,21 @@
 import gspread
+import os
+import json
 
-SERVICE_ACCOUNT_FILE = os.getenv('SERVICE_ACCOUNT_FILE', '/Users/neilz./Documents/Projects/nurse-shift-scheduler/service_account.json')
+load_dotenv_available = True
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    load_dotenv_available = False
+
+SA_JSON = os.getenv('SERVICE_ACCOUNT_JSON')
+if SA_JSON:
+    with open('/tmp/service_account.json', 'w') as f:
+        f.write(SA_JSON)
+    SERVICE_ACCOUNT_FILE = '/tmp/service_account.json'
+else:
+    SERVICE_ACCOUNT_FILE = os.getenv('SERVICE_ACCOUNT_FILE', '/Users/neilz./Documents/Projects/nurse-shift-scheduler/service_account.json')
 
 SHIFT_REQUIREMENTS = {
     'Morning': {'nurses': 4, 'assistants': 2},
@@ -30,7 +45,6 @@ def generate_schedule():
     headers = all_data[0]
     rows = all_data[1:]
 
-    # Parse staff
     staff = []
     for row in rows:
         if not row[0]:
@@ -38,11 +52,10 @@ def generate_schedule():
         staff.append({
             'name': row[0],
             'phone': row[1],
-            'role': row[2],   # Senior / Junior / Assistant
-            'type': row[3],   # Nurse / Assistant
+            'role': row[2],
+            'type': row[3],
         })
 
-    # Parse shift columns (col index 4 onwards)
     shift_columns = []
     for i, header in enumerate(headers[4:], start=4):
         parts = header.split(' ')
@@ -55,7 +68,6 @@ def generate_schedule():
                 'header': header,
             })
 
-    # Build preference map: {staff_name: {col_index: WANT/CAN/NO}}
     pref_map = {}
     for row in rows:
         if not row[0]:
@@ -67,7 +79,6 @@ def generate_schedule():
             val = row[col_i] if col_i < len(row) else ''
             pref_map[name][col_i] = val if val in ['WANT', 'CAN', 'NO'] else ''
 
-    # Generate schedule
     schedule = {}
 
     for sc in shift_columns:
@@ -77,14 +88,10 @@ def generate_schedule():
 
         def rank(person, col_i=col_i):
             pref = pref_map[person['name']].get(col_i, '')
-            if pref == 'WANT':
-                return 0
-            elif pref == 'CAN':
-                return 1
-            elif pref == 'NO':
-                return 3
-            else:
-                return 2  # No response = treat like CAN
+            if pref == 'WANT': return 0
+            elif pref == 'CAN': return 1
+            elif pref == 'NO': return 3
+            else: return 2
 
         nurses = [s for s in staff if s['type'] == 'Nurse']
         assistants = [s for s in staff if s['type'] == 'Assistant']
@@ -92,18 +99,14 @@ def generate_schedule():
         nurses_sorted = sorted(nurses, key=rank)
         assistants_sorted = sorted(assistants, key=rank)
 
-        # Pick nurses (exclude NO if possible)
         available_nurses = [n for n in nurses_sorted if pref_map[n['name']].get(col_i, '') != 'NO']
         if len(available_nurses) < req['nurses']:
             available_nurses = nurses_sorted
-
         assigned_nurses = available_nurses[:req['nurses']]
 
-        # Pick head shift nurse from seniors in assigned nurses
         seniors = [n for n in assigned_nurses if n['role'] == 'Senior']
         head = seniors[0] if seniors else assigned_nurses[0] if assigned_nurses else None
 
-        # Pick assistants
         available_asst = [a for a in assistants_sorted if pref_map[a['name']].get(col_i, '') != 'NO']
         if len(available_asst) < req['assistants']:
             available_asst = assistants_sorted
@@ -116,7 +119,6 @@ def generate_schedule():
             'assistants': assigned_asst,
         }
 
-    # Print proposed schedule
     print("\n=== PROPOSED SCHEDULE ===\n")
     for col_i, slot in schedule.items():
         print(f"📅 {slot['header']}")
@@ -127,7 +129,6 @@ def generate_schedule():
             print(f"   🧹 {a['name']} (Assistant)")
         print()
 
-    # Write to Proposed Schedule sheet
     try:
         spreadsheet = get_spreadsheet()
 
